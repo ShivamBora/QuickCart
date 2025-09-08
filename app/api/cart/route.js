@@ -31,12 +31,11 @@ export async function PUT(request){
             return NextResponse.json({ error: "cartItems must be an object" }, { status: 400 });
         }
         await connectDB();
-        const user = await User.findById(userId);
-        if(!user){
-            return NextResponse.json({ error: "User not found" }, { status: 404 });
-        }
-        user.cartItems = cartItems;
-        await user.save();
+        const user = await User.findByIdAndUpdate(
+            userId,
+            { $set: { cartItems } },
+            { new: true, upsert: true }
+        );
         return NextResponse.json({ cartItems: user.cartItems });
     }catch(err){
         return NextResponse.json({ error: err.message }, { status: 500 });
@@ -56,10 +55,11 @@ export async function PATCH(request){
             return NextResponse.json({ error: "itemId and numeric quantity required" }, { status: 400 });
         }
         await connectDB();
-        const doc = await User.findById(userId);
-        if(!doc){
-            return NextResponse.json({ error: "User not found" }, { status: 404 });
-        }
+        const doc = await User.findByIdAndUpdate(
+            userId,
+            { $setOnInsert: { cartItems: {} } },
+            { new: true, upsert: true }
+        );
         const current = doc.cartItems || {};
         if(quantity <= 0){
             delete current[itemId];

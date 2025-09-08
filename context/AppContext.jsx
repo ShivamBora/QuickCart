@@ -109,12 +109,16 @@ const {user}=useUser()
     // Load cart from server when user logs in
     useEffect(() => {
         const loadCart = async () => {
-            if(!user) return;
+            if(!user){
+                setCartItems({})
+                return;
+            }
             try{
                 const res = await fetch('/api/cart');
                 if(res.ok){
                     const data = await res.json();
                     setCartItems(data.cartItems || {})
+                    console.log('[Cart] Loaded from server')
                 }
             }catch(err){
                 console.error('Failed to load cart', err)

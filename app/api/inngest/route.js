@@ -1,5 +1,5 @@
 console.log(`--- Inngest API route loaded. MONGO_URI is: ${process.env.MONGO_URI} ---`);
-
+import '@/lib/env-check.js';
 import { serve } from "inngest/next";
 import { inngest, syncUserCreation, syncUserDeletion, syncUserUpdation } from "@/config/inngest";
 

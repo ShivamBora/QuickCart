@@ -14,7 +14,7 @@ export const AppContextProvider = (props) => {
 
     const currency = process.env.NEXT_PUBLIC_CURRENCY
     const router = useRouter()
-const {user}=useUser()
+const {user,isLoaded,isSignedIn}=useUser()
     const [products, setProducts] = useState([])
     const [userData, setUserData] = useState(false)
     const [isSeller, setIsSeller] = useState(true)
@@ -45,7 +45,8 @@ const {user}=useUser()
                 const res = await fetch('/api/cart',{
                     method:'PATCH',
                     headers:{'Content-Type':'application/json'},
-                    body: JSON.stringify({ itemId, quantity: cartData[itemId] })
+                    body: JSON.stringify({ itemId, quantity: cartData[itemId] }),
+                    cache:'no-store'
                 })
                 if(res.ok){
                     console.log('[Cart] Server acknowledged add', { itemId })
@@ -71,7 +72,8 @@ const {user}=useUser()
                 await fetch('/api/cart',{
                     method:'PATCH',
                     headers:{'Content-Type':'application/json'},
-                    body: JSON.stringify({ itemId, quantity })
+                    body: JSON.stringify({ itemId, quantity }),
+                    cache:'no-store'
                 })
             }
         }catch(err){
@@ -112,12 +114,15 @@ const {user}=useUser()
     // Load cart from server when user logs in
     useEffect(() => {
         const loadCart = async () => {
-            if(!user){
+            if(!isLoaded){
+                return;
+            }
+            if(!isSignedIn){
                 setCartItems({})
                 return;
             }
             try{
-                const res = await fetch('/api/cart');
+                const res = await fetch('/api/cart',{ cache:'no-store' });
                 if(res.ok){
                     const data = await res.json();
                     setCartItems(data.cartItems || {})
@@ -128,7 +133,7 @@ const {user}=useUser()
             }
         }
         loadCart();
-    }, [user?.id])
+    }, [isLoaded,isSignedIn,user?.id])
 
     const value = {
         user,

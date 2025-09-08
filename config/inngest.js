@@ -40,12 +40,12 @@ export const syncUserUpdation=inngest.createFunction(
         await User.findByIdAndUpdate(id,userData)
     }
 )
-export const syncUserDeletion = ingest.createFunction(
+export const syncUserDeletion = inngest.createFunction(
     {
         id: 'delete-user-with-clerk'
     },
     {
-        event: 'cler/user.deleted'
+        event: 'clerk/user.deleted'
     },
     async({event})=>{
         const {id}=event.data

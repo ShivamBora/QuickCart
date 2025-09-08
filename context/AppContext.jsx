@@ -30,6 +30,7 @@ const {user}=useUser()
 
     const addToCart = async (itemId) => {
 
+        console.log(`[Cart] Adding item`, { itemId });
         let cartData = structuredClone(cartItems);
         if (cartData[itemId]) {
             cartData[itemId] += 1;
@@ -38,6 +39,18 @@ const {user}=useUser()
             cartData[itemId] = 1;
         }
         setCartItems(cartData);
+        // persist to server if authenticated
+        try{
+            if(user){
+                await fetch('/api/cart',{
+                    method:'PATCH',
+                    headers:{'Content-Type':'application/json'},
+                    body: JSON.stringify({ itemId, quantity: cartData[itemId] })
+                })
+            }
+        }catch(err){
+            console.error('Failed to persist cart item', err)
+        }
 
     }
 
@@ -50,6 +63,17 @@ const {user}=useUser()
             cartData[itemId] = quantity;
         }
         setCartItems(cartData)
+        try{
+            if(user){
+                await fetch('/api/cart',{
+                    method:'PATCH',
+                    headers:{'Content-Type':'application/json'},
+                    body: JSON.stringify({ itemId, quantity })
+                })
+            }
+        }catch(err){
+            console.error('Failed to persist cart update', err)
+        }
 
     }
 
@@ -81,6 +105,23 @@ const {user}=useUser()
     useEffect(() => {
         fetchUserData()
     }, [])
+
+    // Load cart from server when user logs in
+    useEffect(() => {
+        const loadCart = async () => {
+            if(!user) return;
+            try{
+                const res = await fetch('/api/cart');
+                if(res.ok){
+                    const data = await res.json();
+                    setCartItems(data.cartItems || {})
+                }
+            }catch(err){
+                console.error('Failed to load cart', err)
+            }
+        }
+        loadCart();
+    }, [user?.id])
 
     const value = {
         user,

@@ -63,6 +63,13 @@ const {user,isLoaded,isSignedIn}=useUser()
                 }
                 if(res.ok){
                     console.log('[Cart] Server acknowledged add', { itemId })
+                    // confirm server state and sync
+                    const check = await fetch('/api/cart',{ cache:'no-store', credentials:'include' })
+                    if(check.ok){
+                        const data = await check.json();
+                        setCartItems(data.cartItems || {})
+                        console.log('[Cart] Synced after add, keys:', Object.keys(data.cartItems||{}).length)
+                    }
                 } else {
                     console.error('[Cart] Persist failed', res.status)
                 }
@@ -101,6 +108,13 @@ const {user,isLoaded,isSignedIn}=useUser()
                         cache:'no-store',
                         credentials:'include'
                     })
+                }
+                // re-fetch to ensure state matches server
+                const check = await fetch('/api/cart',{ cache:'no-store', credentials:'include' })
+                if(check.ok){
+                    const data = await check.json();
+                    setCartItems(data.cartItems || {})
+                    console.log('[Cart] Synced after update, keys:', Object.keys(data.cartItems||{}).length)
                 }
             }
         }catch(err){

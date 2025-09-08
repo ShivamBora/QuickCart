@@ -42,11 +42,14 @@ const {user}=useUser()
         // persist to server if authenticated
         try{
             if(user){
-                await fetch('/api/cart',{
+                const res = await fetch('/api/cart',{
                     method:'PATCH',
                     headers:{'Content-Type':'application/json'},
                     body: JSON.stringify({ itemId, quantity: cartData[itemId] })
                 })
+                if(res.ok){
+                    console.log('[Cart] Server acknowledged add', { itemId })
+                }
             }
         }catch(err){
             console.error('Failed to persist cart item', err)

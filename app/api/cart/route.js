@@ -6,14 +6,17 @@ import User from "@/models/User";
 export async function GET() {
     try{
         const { userId } = auth();
+        console.log('[API /api/cart][GET] userId=', userId)
         if(!userId){
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
         await connectDB();
         const user = await User.findById(userId).lean();
         const cartItems = user?.cartItems || {};
+        console.log('[API /api/cart][GET] cartItems keys=', Object.keys(cartItems||{}).length)
         return NextResponse.json({ cartItems });
     }catch(err){
+        console.error('[API /api/cart][GET] error', err)
         return NextResponse.json({ error: err.message }, { status: 500 });
     }
 }
@@ -22,6 +25,7 @@ export async function GET() {
 export async function PUT(request){
     try{
         const { userId } = auth();
+        console.log('[API /api/cart][PUT] userId=', userId)
         if(!userId){
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
@@ -36,8 +40,10 @@ export async function PUT(request){
             { $set: { cartItems } },
             { new: true, upsert: true }
         );
+        console.log('[API /api/cart][PUT] saved keys=', Object.keys(user.cartItems||{}).length)
         return NextResponse.json({ cartItems: user.cartItems });
     }catch(err){
+        console.error('[API /api/cart][PUT] error', err)
         return NextResponse.json({ error: err.message }, { status: 500 });
     }
 }
@@ -46,6 +52,7 @@ export async function PUT(request){
 export async function PATCH(request){
     try{
         const { userId } = auth();
+        console.log('[API /api/cart][PATCH] userId=', userId)
         if(!userId){
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
@@ -68,8 +75,10 @@ export async function PATCH(request){
         }
         doc.cartItems = current;
         await doc.save();
+        console.log('[API /api/cart][PATCH] itemId=', itemId, 'quantity=', quantity, 'totalKeys=', Object.keys(doc.cartItems||{}).length)
         return NextResponse.json({ cartItems: doc.cartItems });
     }catch(err){
+        console.error('[API /api/cart][PATCH] error', err)
         return NextResponse.json({ error: err.message }, { status: 500 });
     }
 }

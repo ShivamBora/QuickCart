@@ -46,7 +46,8 @@ const {user,isLoaded,isSignedIn}=useUser()
                     method:'PATCH',
                     headers:{'Content-Type':'application/json'},
                     body: JSON.stringify({ itemId, quantity: cartData[itemId] }),
-                    cache:'no-store'
+                    cache:'no-store',
+                    credentials:'include'
                 })
                 if(res.ok){
                     console.log('[Cart] Server acknowledged add', { itemId })
@@ -73,7 +74,8 @@ const {user,isLoaded,isSignedIn}=useUser()
                     method:'PATCH',
                     headers:{'Content-Type':'application/json'},
                     body: JSON.stringify({ itemId, quantity }),
-                    cache:'no-store'
+                    cache:'no-store',
+                    credentials:'include'
                 })
             }
         }catch(err){
@@ -122,11 +124,11 @@ const {user,isLoaded,isSignedIn}=useUser()
                 return;
             }
             try{
-                const res = await fetch('/api/cart',{ cache:'no-store' });
+                const res = await fetch('/api/cart',{ cache:'no-store', credentials:'include' });
                 if(res.ok){
                     const data = await res.json();
                     setCartItems(data.cartItems || {})
-                    console.log('[Cart] Loaded from server')
+                    console.log('[Cart] Loaded from server, item keys:', Object.keys(data.cartItems||{}).length)
                 }
             }catch(err){
                 console.error('Failed to load cart', err)

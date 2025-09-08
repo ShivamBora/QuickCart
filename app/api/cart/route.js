@@ -63,12 +63,12 @@ export async function PATCH(request){
             return NextResponse.json({ error: "itemId and numeric quantity required" }, { status: 400 });
         }
         await connectDB();
-        const doc = await User.findByIdAndUpdate(
-            userId,
-            { $setOnInsert: { cartItems: {} } },
-            { new: true, upsert: true }
-        );
-        const current = doc.cartItems || {};
+        // ensure doc exists and initialize cart
+        let doc = await User.findById(userId);
+        if(!doc){
+            doc = await User.create({ _id: userId, cartItems: {} });
+        }
+        const current = { ...(doc.cartItems || {}) };
         if(quantity <= 0){
             delete current[itemId];
         } else {

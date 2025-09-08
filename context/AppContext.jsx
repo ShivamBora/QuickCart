@@ -42,15 +42,29 @@ const {user,isLoaded,isSignedIn}=useUser()
         // persist to server if authenticated
         try{
             if(user){
-                const res = await fetch('/api/cart',{
+                let res = await fetch('/api/cart',{
                     method:'PATCH',
                     headers:{'Content-Type':'application/json'},
                     body: JSON.stringify({ itemId, quantity: cartData[itemId] }),
                     cache:'no-store',
                     credentials:'include'
                 })
+                if(!res.ok){
+                    const text = await res.text();
+                    console.warn('[Cart] PATCH failed, falling back to PUT', res.status, text)
+                    // fallback to PUT full cart
+                    res = await fetch('/api/cart',{
+                        method:'PUT',
+                        headers:{'Content-Type':'application/json'},
+                        body: JSON.stringify({ cartItems: cartData }),
+                        cache:'no-store',
+                        credentials:'include'
+                    })
+                }
                 if(res.ok){
                     console.log('[Cart] Server acknowledged add', { itemId })
+                } else {
+                    console.error('[Cart] Persist failed', res.status)
                 }
             }
         }catch(err){
@@ -70,13 +84,24 @@ const {user,isLoaded,isSignedIn}=useUser()
         setCartItems(cartData)
         try{
             if(user){
-                await fetch('/api/cart',{
+                let res = await fetch('/api/cart',{
                     method:'PATCH',
                     headers:{'Content-Type':'application/json'},
                     body: JSON.stringify({ itemId, quantity }),
                     cache:'no-store',
                     credentials:'include'
                 })
+                if(!res.ok){
+                    const text = await res.text();
+                    console.warn('[Cart] PATCH failed, falling back to PUT', res.status, text)
+                    await fetch('/api/cart',{
+                        method:'PUT',
+                        headers:{'Content-Type':'application/json'},
+                        body: JSON.stringify({ cartItems: cartData }),
+                        cache:'no-store',
+                        credentials:'include'
+                    })
+                }
             }
         }catch(err){
             console.error('Failed to persist cart update', err)

@@ -1,13 +1,13 @@
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { getAuth } from "@clerk/nextjs/server";
 import connectDB from "@/config/db";
 import User from "@/models/User";
 
-export async function GET() {
+export async function GET(request) {
     try{
-        const { userId } = auth();
+        const { userId } = getAuth(request);
         console.log('[API /api/cart][GET] userId=', userId)
         if(!userId){
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -26,7 +26,7 @@ export async function GET() {
 // Replace entire cart
 export async function PUT(request){
     try{
-        const { userId } = auth();
+        const { userId } = getAuth(request);
         console.log('[API /api/cart][PUT] userId=', userId)
         if(!userId){
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -53,7 +53,7 @@ export async function PUT(request){
 // Update a single item quantity: { itemId, quantity }
 export async function PATCH(request){
     try{
-        const { userId } = auth();
+        const { userId } = getAuth(request);
         console.log('[API /api/cart][PATCH] userId=', userId)
         if(!userId){
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
